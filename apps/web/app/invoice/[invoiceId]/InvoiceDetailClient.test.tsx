@@ -344,13 +344,17 @@ describe("InvoiceDetailClient", () => {
     const copyButtons = screen.getAllByRole("button", { name: /^COPY$/ });
     expect(copyButtons).toHaveLength(2);
 
+    // Click issuer copy button (first one)
     fireEvent.click(copyButtons[0]);
     await waitFor(() => expect(writeText).toHaveBeenCalledWith(ISSUER));
 
-    fireEvent.click(screen.getByRole("button", { name: /^COPY$/ }));
+    // Click buyer copy button (second one)
+    fireEvent.click(copyButtons[1]);
     await waitFor(() => expect(writeText).toHaveBeenCalledWith(BUYER));
 
-    expect(await screen.findAllByText("COPIED")).toHaveLength(2);
+    // Check that both show COPIED (the component uses separate state for each)
+    const copiedTexts = await screen.findAllByText("COPIED");
+    expect(copiedTexts).toHaveLength(2);
   });
 
   it("copies the invoice link to the clipboard once the URL is available", async () => {

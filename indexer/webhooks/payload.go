@@ -13,17 +13,17 @@ type EventType string
 
 const (
 	// Invoice lifecycle events
-	EventInvoiceCreated  EventType = "invoice.created"
-	EventInvoiceFunded   EventType = "invoice.funded"
-	EventInvoiceRepaid   EventType = "invoice.repaid"
+	EventInvoiceCreated   EventType = "invoice.created"
+	EventInvoiceFunded    EventType = "invoice.funded"
+	EventInvoiceRepaid    EventType = "invoice.repaid"
 	EventInvoiceDefaulted EventType = "invoice.defaulted"
-	EventInvoiceListed   EventType = "invoice.listed"
-	EventInvoiceShipped  EventType = "invoice.shipped"
+	EventInvoiceListed    EventType = "invoice.listed"
+	EventInvoiceShipped   EventType = "invoice.shipped"
 	EventInvoiceConfirmed EventType = "invoice.confirmed"
 
 	// Pool events
-	EventPoolDeposit     EventType = "pool.deposit"
-	EventPoolWithdrawal  EventType = "pool.withdrawal"
+	EventPoolDeposit          EventType = "pool.deposit"
+	EventPoolWithdrawal       EventType = "pool.withdrawal"
 	EventPoolYieldDistributed EventType = "pool.yield_distributed"
 )
 
@@ -56,29 +56,29 @@ type WebhookEnvelope struct {
 
 // InvoiceEventData is the payload for invoice lifecycle events.
 type InvoiceEventData struct {
-	InvoiceID       string `json:"invoice_id"`
-	Issuer          string `json:"issuer"`
-	Buyer           string `json:"buyer"`
-	FaceValue       string `json:"face_value"`
-	DiscountBps     int    `json:"discount_bps,omitempty"`
-	FundedAmount    string `json:"funded_amount,omitempty"`
-	DueDate         int64  `json:"due_date"`
-	Status          string `json:"status"`
-	CreatedAt       int64  `json:"created_at,omitempty"`
-	FundedAt        *int64 `json:"funded_at,omitempty"`
-	ShippedAt       *int64 `json:"shipped_at,omitempty"`
+	InvoiceID        string `json:"invoice_id"`
+	Issuer           string `json:"issuer"`
+	Buyer            string `json:"buyer"`
+	FaceValue        string `json:"face_value"`
+	DiscountBps      int    `json:"discount_bps,omitempty"`
+	FundedAmount     string `json:"funded_amount,omitempty"`
+	DueDate          int64  `json:"due_date"`
+	Status           string `json:"status"`
+	CreatedAt        int64  `json:"created_at,omitempty"`
+	FundedAt         *int64 `json:"funded_at,omitempty"`
+	ShippedAt        *int64 `json:"shipped_at,omitempty"`
 	BuyerConfirmedAt *int64 `json:"buyer_confirmed_at,omitempty"`
-	RepaidAt        *int64 `json:"repaid_at,omitempty"`
+	RepaidAt         *int64 `json:"repaid_at,omitempty"`
 }
 
 // PoolEventData is the payload for pool events.
 type PoolEventData struct {
-	Account       string `json:"account"`
-	Amount        string `json:"amount"`
-	Shares        string `json:"shares,omitempty"`
-	NewBalance    string `json:"new_balance,omitempty"`
-	YieldAmount   string `json:"yield_amount,omitempty"`
-	TotalShares   string `json:"total_shares,omitempty"`
+	Account     string `json:"account"`
+	Amount      string `json:"amount"`
+	Shares      string `json:"shares,omitempty"`
+	NewBalance  string `json:"new_balance,omitempty"`
+	YieldAmount string `json:"yield_amount,omitempty"`
+	TotalShares string `json:"total_shares,omitempty"`
 }
 
 // NewInvoiceCreatedPayload creates a WebhookEnvelope for invoice.created events.
@@ -201,10 +201,10 @@ func ExampleInvoiceCreatedPayload() string {
 // ExamplePoolDepositPayload returns an example pool.deposit payload for documentation.
 func ExamplePoolDepositPayload() string {
 	data := PoolEventData{
-		Account:    "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
-		Amount:     "5000000000",
-		Shares:     "5000000000",
-		NewBalance: "10000000000",
+		Account:     "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+		Amount:      "5000000000",
+		Shares:      "5000000000",
+		NewBalance:  "10000000000",
 		TotalShares: "10000000000",
 	}
 	env, _ := NewPoolDepositPayload(

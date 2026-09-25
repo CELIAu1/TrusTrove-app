@@ -102,19 +102,19 @@ func (d *Dispatcher) Dispatch(ctx context.Context, eventType string, data map[st
 		webhooks.EventInvoiceDefaulted, webhooks.EventInvoiceListed, webhooks.EventInvoiceShipped,
 		webhooks.EventInvoiceConfirmed:
 		invoiceData := webhooks.InvoiceEventData{
-			InvoiceID:       getString(data, "invoice_id"),
-			Issuer:          getString(data, "issuer"),
-			Buyer:           getString(data, "buyer"),
-			FaceValue:       getString(data, "face_value"),
-			DiscountBps:     getInt(data, "discount_bps"),
-			FundedAmount:    getString(data, "funded_amount"),
-			DueDate:         getInt64(data, "due_date"),
-			Status:          getString(data, "status"),
-			CreatedAt:       getInt64(data, "created_at"),
-			FundedAt:        getInt64Ptr(data, "funded_at"),
-			ShippedAt:       getInt64Ptr(data, "shipped_at"),
+			InvoiceID:        getString(data, "invoice_id"),
+			Issuer:           getString(data, "issuer"),
+			Buyer:            getString(data, "buyer"),
+			FaceValue:        getString(data, "face_value"),
+			DiscountBps:      getInt(data, "discount_bps"),
+			FundedAmount:     getString(data, "funded_amount"),
+			DueDate:          getInt64(data, "due_date"),
+			Status:           getString(data, "status"),
+			CreatedAt:        getInt64(data, "created_at"),
+			FundedAt:         getInt64Ptr(data, "funded_at"),
+			ShippedAt:        getInt64Ptr(data, "shipped_at"),
 			BuyerConfirmedAt: getInt64Ptr(data, "buyer_confirmed_at"),
-			RepaidAt:        getInt64Ptr(data, "repaid_at"),
+			RepaidAt:         getInt64Ptr(data, "repaid_at"),
 		}
 		var err error
 		switch publicEventType {

@@ -4,8 +4,31 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { InvoiceTable } from "./InvoiceTable";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+vi.mock("@/store/wallet", () => ({
+  useWalletStore: vi.fn(() => ({
+    address: "GACR43ILX6H4PGAOO5QKSZLU4ZJMGT3E66EAUDPLM5J6YTP4Y3PSHWGB",
+  })),
+}));
+
 vi.mock("@/hooks/useProfile", () => ({
   useProfile: vi.fn(() => ({ isVerified: true })),
+}));
+
+vi.mock("@/hooks/useInvoices", () => ({
+  useInvoiceActions: () => ({
+    listInvoice: vi.fn().mockResolvedValue({}),
+    fundInvoice: vi.fn().mockResolvedValue({}),
+    shipInvoice: vi.fn().mockResolvedValue({}),
+    confirmDelivery: vi.fn().mockResolvedValue({}),
+    repayInvoice: vi.fn().mockResolvedValue({}),
+    defaultInvoice: vi.fn().mockResolvedValue({}),
+  }),
+}));
+
+vi.mock("@/store/confirmDialog", () => ({
+  useConfirmDialogStore: () => ({
+    request: vi.fn(),
+  }),
 }));
 
 const queryClient = new QueryClient();
@@ -38,8 +61,9 @@ const mockInvoices = [
 describe("InvoiceTable", () => {
   it("renders a list of invoices", () => {
     renderWithQueryClient(<InvoiceTable invoices={mockInvoices as any} />);
-    expect(screen.getByText(/1,000.00 USDC/)).toBeInTheDocument();
-    expect(screen.getByText(/2,000.00 USDC/)).toBeInTheDocument();
+    // Check table rows (desktop view) - use getAllByText since mobile cards also render
+    expect(screen.getAllByText(/1,000.00 USDC/)).toHaveLength(2); // table + mobile card
+    expect(screen.getAllByText(/2,000.00 USDC/)).toHaveLength(2); // table + mobile card
   });
 
   it("renders a helpful empty state when no invoices", () => {
@@ -107,7 +131,9 @@ describe("InvoiceTable", () => {
   });
 
   it("marks the active row with aria-selected=true", () => {
-    renderWithQueryClient(<InvoiceTable invoices={mockInvoices as any} activeId="1" />);
+    renderWithQueryClient(
+      <InvoiceTable invoices={mockInvoices as any} activeId="1" />,
+    );
     const rows = screen.getAllByRole("row");
     const activeRow = rows.find(
       (r) => r.getAttribute("aria-selected") === "true",
@@ -186,7 +212,9 @@ describe("InvoiceTable", () => {
     });
 
     it("adds a checkbox column plus a select-all checkbox when selectable", () => {
-      renderWithQueryClient(<InvoiceTable invoices={mockInvoices as any} selectable />);
+      renderWithQueryClient(
+        <InvoiceTable invoices={mockInvoices as any} selectable />,
+      );
 
       const headers = screen.getAllByRole("columnheader");
       expect(headers).toHaveLength(7);
@@ -203,7 +231,9 @@ describe("InvoiceTable", () => {
     });
 
     it("labels each row checkbox with its invoice id", () => {
-      renderWithQueryClient(<InvoiceTable invoices={mockInvoices as any} selectable />);
+      renderWithQueryClient(
+        <InvoiceTable invoices={mockInvoices as any} selectable />,
+      );
       mockInvoices.forEach((invoice) => {
         expect(
           screen.getByRole("checkbox", {
@@ -215,7 +245,7 @@ describe("InvoiceTable", () => {
 
     it("reports a selection when a row checkbox is toggled", () => {
       const onSelectionChange = vi.fn();
-      render(
+      renderWithQueryClient(
         <InvoiceTable
           invoices={mockInvoices as any}
           selectable
@@ -230,7 +260,9 @@ describe("InvoiceTable", () => {
     });
 
     it("tracks its own selection when selectedIds is not supplied", () => {
-      renderWithQueryClient(<InvoiceTable invoices={mockInvoices as any} selectable />);
+      renderWithQueryClient(
+        <InvoiceTable invoices={mockInvoices as any} selectable />,
+      );
 
       const rowCheckbox = screen.getByRole("checkbox", {
         name: /select invoice 1$/i,
@@ -244,7 +276,7 @@ describe("InvoiceTable", () => {
 
     it("deselects an already-selected row", () => {
       const onSelectionChange = vi.fn();
-      render(
+      renderWithQueryClient(
         <InvoiceTable
           invoices={mockInvoices as any}
           selectable
@@ -260,7 +292,7 @@ describe("InvoiceTable", () => {
     });
 
     it("honors a controlled selectedIds value", () => {
-      render(
+      renderWithQueryClient(
         <InvoiceTable
           invoices={mockInvoices as any}
           selectable
@@ -283,7 +315,7 @@ describe("InvoiceTable", () => {
 
     it("select-all selects every invoice on the page", () => {
       const onSelectionChange = vi.fn();
-      render(
+      renderWithQueryClient(
         <InvoiceTable
           invoices={mockInvoices as any}
           selectable
@@ -301,7 +333,7 @@ describe("InvoiceTable", () => {
 
     it("select-all clears only the current page, preserving other pages", () => {
       const onSelectionChange = vi.fn();
-      render(
+      renderWithQueryClient(
         <InvoiceTable
           invoices={mockInvoices as any}
           selectable
@@ -320,7 +352,7 @@ describe("InvoiceTable", () => {
     });
 
     it("select-all is indeterminate when only some rows are selected", () => {
-      render(
+      renderWithQueryClient(
         <InvoiceTable
           invoices={mockInvoices as any}
           selectable
@@ -338,7 +370,7 @@ describe("InvoiceTable", () => {
 
     it("shows the selected count and clears it from the toolbar", () => {
       const onSelectionChange = vi.fn();
-      render(
+      renderWithQueryClient(
         <InvoiceTable
           invoices={mockInvoices as any}
           selectable
@@ -353,7 +385,9 @@ describe("InvoiceTable", () => {
     });
 
     it("hides Clear selection while nothing is selected", () => {
-      renderWithQueryClient(<InvoiceTable invoices={mockInvoices as any} selectable />);
+      renderWithQueryClient(
+        <InvoiceTable invoices={mockInvoices as any} selectable />,
+      );
       expect(screen.getByText(/0 selected/i)).toBeInTheDocument();
       expect(
         screen.queryByRole("button", { name: /clear selection/i }),
@@ -362,7 +396,7 @@ describe("InvoiceTable", () => {
 
     it("checkboxes are keyboard-operable", () => {
       const onSelectionChange = vi.fn();
-      render(
+      renderWithQueryClient(
         <InvoiceTable
           invoices={mockInvoices as any}
           selectable
@@ -383,7 +417,7 @@ describe("InvoiceTable", () => {
 
     it("toggling a checkbox does not trigger row single-select", () => {
       const onSelectInvoice = vi.fn();
-      render(
+      renderWithQueryClient(
         <InvoiceTable
           invoices={mockInvoices as any}
           selectable
@@ -400,7 +434,7 @@ describe("InvoiceTable", () => {
 
     it("Space on a focused checkbox does not also fire onSelectInvoice", () => {
       const onSelectInvoice = vi.fn();
-      render(
+      renderWithQueryClient(
         <InvoiceTable
           invoices={mockInvoices as any}
           selectable
@@ -418,7 +452,7 @@ describe("InvoiceTable", () => {
     });
 
     it("marks selected rows with aria-selected in multi-select mode", () => {
-      render(
+      renderWithQueryClient(
         <InvoiceTable
           invoices={mockInvoices as any}
           selectable
@@ -435,7 +469,7 @@ describe("InvoiceTable", () => {
 
     it("keeps row keyboard navigation working alongside checkboxes", () => {
       const onSelectInvoice = vi.fn();
-      render(
+      renderWithQueryClient(
         <InvoiceTable
           invoices={mockInvoices as any}
           selectable

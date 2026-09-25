@@ -79,19 +79,19 @@ func TestWebhookEnvelope_MarshalUnmarshal(t *testing.T) {
 
 func TestInvoiceEventData_MarshalUnmarshal(t *testing.T) {
 	data := InvoiceEventData{
-		InvoiceID:       "INV1234567890abcdef",
-		Issuer:          "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
-		Buyer:           "GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN",
-		FaceValue:       "1000000000",
-		DiscountBps:     200,
-		FundedAmount:    "980000000",
-		DueDate:         1735689600,
-		Status:          "Funded",
-		CreatedAt:       1735516800,
-		FundedAt:        int64Ptr(1735520400),
-		ShippedAt:       int64Ptr(1735524000),
+		InvoiceID:        "INV1234567890abcdef",
+		Issuer:           "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+		Buyer:            "GAAZI4TCR3TY5OJHCTJC2A4QSY6CJWJH5IAJTGKIN2ER7LBNVKOCCWN",
+		FaceValue:        "1000000000",
+		DiscountBps:      200,
+		FundedAmount:     "980000000",
+		DueDate:          1735689600,
+		Status:           "Funded",
+		CreatedAt:        1735516800,
+		FundedAt:         int64Ptr(1735520400),
+		ShippedAt:        int64Ptr(1735524000),
 		BuyerConfirmedAt: int64Ptr(1735527600),
-		RepaidAt:        int64Ptr(1735531200),
+		RepaidAt:         int64Ptr(1735531200),
 	}
 
 	jsonData, err := json.Marshal(data)
@@ -235,10 +235,10 @@ func TestNewInvoiceCreatedPayload(t *testing.T) {
 
 func TestNewPoolDepositPayload(t *testing.T) {
 	data := PoolEventData{
-		Account:    "GBBD...",
-		Amount:     "5000000000",
-		Shares:     "5000000000",
-		NewBalance: "10000000000",
+		Account:     "GBBD...",
+		Amount:      "5000000000",
+		Shares:      "5000000000",
+		NewBalance:  "10000000000",
 		TotalShares: "10000000000",
 	}
 
