@@ -18,6 +18,7 @@ import (
 	"trusttrove/indexer/db"
 	"trusttrove/indexer/listener"
 	"trusttrove/indexer/webhook"
+	"trusttrove/indexer/webhooks"
 )
 
 func main() {
@@ -87,11 +88,14 @@ func main() {
 		Handler: router,
 	}
 
-	// 4. Start Webhook Dispatcher Worker in Background
+	// 4. Start Webhook Dispatcher (for enqueueing) and Delivery Worker (for sending) in Background
 	webhookDispatcher := webhook.NewDispatcher()
+	webhookDeliveryWorker := webhooks.NewDeliveryWorker(webhooks.DefaultWorkerConfig())
 	go func() {
-		slog.Info("Starting webhook dispatcher worker...")
-		webhookDispatcher.RunWorker(ctx)
+		slog.Info("Starting webhook delivery worker...")
+		if err := webhookDeliveryWorker.Start(ctx); err != nil && err != context.Canceled {
+			slog.Error("Webhook delivery worker exited with error", "error", err)
+		}
 	}()
 
 	// 5. Start Event Listener in Background
