@@ -255,11 +255,22 @@ func MarkDeliverySuccess(ctx context.Context, deliveryID int64, statusCode int, 
 }
 
 // MarkDeliveryRetry marks a webhook delivery as failed and schedules a retry.
+// If attempts + 1 >= max_attempts, the delivery is marked as dead_letter instead.
 func MarkDeliveryRetry(ctx context.Context, deliveryID int64, nextAttemptAt time.Time, statusCode *int, errorMsg string) error {
 	query := `
 		UPDATE webhook_deliveries
-		SET status = 'pending', last_status = $1, last_error = $2, next_attempt_at = $3,
-		    attempts = attempts + 1, updated_at = CURRENT_TIMESTAMP
+		SET status = CASE
+				WHEN attempts + 1 >= max_attempts THEN 'dead_letter'
+				ELSE 'pending'
+			END,
+			last_status = $1,
+			last_error = $2,
+			next_attempt_at = CASE
+				WHEN attempts + 1 >= max_attempts THEN next_attempt_at
+				ELSE $3
+			END,
+			attempts = attempts + 1,
+			updated_at = CURRENT_TIMESTAMP
 		WHERE id = $4
 	`
 	_, err := Pool.Exec(ctx, query, statusCode, errorMsg, nextAttemptAt, deliveryID)

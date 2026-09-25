@@ -212,7 +212,9 @@ describe("InvoiceTable", () => {
     });
 
     it("adds a checkbox column plus a select-all checkbox when selectable", () => {
-      renderWithQueryClient(<InvoiceTable invoices={mockInvoices as any} selectable />);
+      renderWithQueryClient(
+        <InvoiceTable invoices={mockInvoices as any} selectable />,
+      );
 
       const headers = screen.getAllByRole("columnheader");
       expect(headers).toHaveLength(7);
