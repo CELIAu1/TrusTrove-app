@@ -113,9 +113,7 @@ describe("usePool", () => {
       expect(client.getLPPosition).toHaveBeenNthCalledWith(1, LP, SIGNER);
 
       rerender({ lp: SIGNER });
-      await waitFor(() =>
-        expect(client.getLPPosition).toHaveBeenCalledTimes(2),
-      );
+      await waitFor(() => expect(client.getLPPosition).toHaveBeenCalledTimes(2));
       expect(client.getLPPosition).toHaveBeenNthCalledWith(2, SIGNER, SIGNER);
     });
   });

@@ -46,10 +46,12 @@ export function useAllowance(
   options: UseTokenOptions,
 ): AsyncQueryState<bigint> {
   const client = useMemo(() => tokenClient(options), [options]);
-  return useAsyncQuery(
-    () => client.allowance(from, spender, signerPublicKey),
-    [client, from, spender, signerPublicKey],
-  );
+  return useAsyncQuery(() => client.allowance(from, spender, signerPublicKey), [
+    client,
+    from,
+    spender,
+    signerPublicKey,
+  ]);
 }
 
 export interface UseApproveOptions {
@@ -70,7 +72,12 @@ export interface UseApproveOptions {
 export interface ApproveMutationResult {
   /** Approve a spender (`TokenClient.approve`). */
   approve: AsyncMutationState<
-    [from: string, spender: string, amount: bigint, expirationLedger: number],
+    [
+      from: string,
+      spender: string,
+      amount: bigint,
+      expirationLedger: number,
+    ],
     string
   >;
 }
