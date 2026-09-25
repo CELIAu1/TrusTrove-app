@@ -25,22 +25,22 @@ type WebhookSubscription struct {
 
 // WebhookDelivery represents a webhook delivery attempt in the database.
 type WebhookDelivery struct {
-	ID              int64           `json:"id"`
-	SubscriptionID  uuid.UUID       `json:"subscription_id"`
-	EventType       string          `json:"event_type"`
-	EventID         string          `json:"event_id"`
-	Payload         json.RawMessage `json:"payload"`
-	Attempts        int             `json:"attempts"`
-	MaxAttempts     int             `json:"max_attempts"`
-	NextAttemptAt   time.Time       `json:"next_attempt_at"`
-	LastStatus      *int            `json:"last_status"`
-	LastResponse    *string         `json:"last_response"`
-	LastError       *string         `json:"last_error"`
-	Status          string          `json:"status"`
-	CreatedAt       time.Time       `json:"created_at"`
-	UpdatedAt       time.Time       `json:"updated_at"`
-	EndpointURL     string          `json:"endpoint_url"`     // denormalized for worker convenience
-	EndpointSecret  string          `json:"endpoint_secret"`  // denormalized for worker convenience
+	ID             int64           `json:"id"`
+	SubscriptionID uuid.UUID       `json:"subscription_id"`
+	EventType      string          `json:"event_type"`
+	EventID        string          `json:"event_id"`
+	Payload        json.RawMessage `json:"payload"`
+	Attempts       int             `json:"attempts"`
+	MaxAttempts    int             `json:"max_attempts"`
+	NextAttemptAt  time.Time       `json:"next_attempt_at"`
+	LastStatus     *int            `json:"last_status"`
+	LastResponse   *string         `json:"last_response"`
+	LastError      *string         `json:"last_error"`
+	Status         string          `json:"status"`
+	CreatedAt      time.Time       `json:"created_at"`
+	UpdatedAt      time.Time       `json:"updated_at"`
+	EndpointURL    string          `json:"endpoint_url"`    // denormalized for worker convenience
+	EndpointSecret string          `json:"endpoint_secret"` // denormalized for worker convenience
 }
 
 // CreateWebhookSubscription inserts a new webhook subscription.
