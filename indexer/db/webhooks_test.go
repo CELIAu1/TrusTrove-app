@@ -263,19 +263,27 @@ func TestWebhookDeliveryLifecycle(t *testing.T) {
 	if err := MarkDeliveryRetry(ctx, d2.ID, nextAt, &statusCode, "internal server error"); err != nil {
 		t.Fatalf("MarkDeliveryRetry: %v", err)
 	}
-	// Should still be pending (with updated next_attempt_at)
+	// Delivery is still pending but scheduled for future, so not returned by GetPendingDeliveries
+	// Verify by querying directly
+	var attempts int
+	var statusStr string
+	err = Pool.QueryRow(ctx, "SELECT attempts, status FROM webhook_deliveries WHERE id = $1", d2.ID).Scan(&attempts, &statusStr)
+	if err != nil {
+		t.Fatalf("Query delivery after retry: %v", err)
+	}
+	if attempts != 1 {
+		t.Errorf("Attempts after retry: got %d, want 1", attempts)
+	}
+	if statusStr != "pending" {
+		t.Errorf("Status after retry: got %q, want pending", statusStr)
+	}
+	// GetPendingDeliveries should not return it since next_attempt_at is in the future
 	deliveries, err = GetPendingDeliveries(ctx, 10)
 	if err != nil {
 		t.Fatalf("GetPendingDeliveries after retry: %v", err)
 	}
-	if len(deliveries) != 1 {
-		t.Errorf("Expected 1 pending delivery after retry, got %d", len(deliveries))
-	}
-	if deliveries[0].Attempts != 1 {
-		t.Errorf("Attempts after retry: got %d, want 1", deliveries[0].Attempts)
-	}
-	if deliveries[0].Status != "pending" {
-		t.Errorf("Status after retry: got %q, want pending", deliveries[0].Status)
+	if len(deliveries) != 0 {
+		t.Errorf("Expected 0 pending deliveries (next_attempt_at in future), got %d", len(deliveries))
 	}
 
 	// Create another for dead letter test
@@ -461,6 +469,21 @@ func TestWebhookDeliveryPendingFilter(t *testing.T) {
 	if deliveries[0].EventID != "evt_past" {
 		t.Errorf("Got wrong delivery: %s", deliveries[0].EventID)
 	}
+}
+
+func ExampleCreateWebhookSubscription() {
+	ctx := context.Background()
+	sub := &WebhookSubscription{
+		TargetURL:     "https://myapp.com/webhooks/trusttrove",
+		EventTypes:    []string{"invoice.created", "invoice.funded", "invoice.repaid", "pool.deposit"},
+		SigningSecret: "whsec_abcdef123456",
+		Active:        true,
+	}
+	if err := CreateWebhookSubscription(ctx, sub); err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+	fmt.Printf("Created subscription: %s\n", sub.ID)
 }
 
 func ExampleCreateWebhookSubscription() {

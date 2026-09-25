@@ -25,22 +25,22 @@ type WebhookSubscription struct {
 
 // WebhookDelivery represents a webhook delivery attempt in the database.
 type WebhookDelivery struct {
-	ID              int64           `json:"id"`
-	SubscriptionID  uuid.UUID       `json:"subscription_id"`
-	EventType       string          `json:"event_type"`
-	EventID         string          `json:"event_id"`
-	Payload         json.RawMessage `json:"payload"`
-	Attempts        int             `json:"attempts"`
-	MaxAttempts     int             `json:"max_attempts"`
-	NextAttemptAt   time.Time       `json:"next_attempt_at"`
-	LastStatus      *int            `json:"last_status"`
-	LastResponse    *string         `json:"last_response"`
-	LastError       *string         `json:"last_error"`
-	Status          string          `json:"status"`
-	CreatedAt       time.Time       `json:"created_at"`
-	UpdatedAt       time.Time       `json:"updated_at"`
-	EndpointURL     string          `json:"endpoint_url"`     // denormalized for worker convenience
-	EndpointSecret  string          `json:"endpoint_secret"`  // denormalized for worker convenience
+	ID             int64           `json:"id"`
+	SubscriptionID uuid.UUID       `json:"subscription_id"`
+	EventType      string          `json:"event_type"`
+	EventID        string          `json:"event_id"`
+	Payload        json.RawMessage `json:"payload"`
+	Attempts       int             `json:"attempts"`
+	MaxAttempts    int             `json:"max_attempts"`
+	NextAttemptAt  time.Time       `json:"next_attempt_at"`
+	LastStatus     *int            `json:"last_status"`
+	LastResponse   *string         `json:"last_response"`
+	LastError      *string         `json:"last_error"`
+	Status         string          `json:"status"`
+	CreatedAt      time.Time       `json:"created_at"`
+	UpdatedAt      time.Time       `json:"updated_at"`
+	EndpointURL    string          `json:"endpoint_url"`    // denormalized for worker convenience
+	EndpointSecret string          `json:"endpoint_secret"` // denormalized for worker convenience
 }
 
 // CreateWebhookSubscription inserts a new webhook subscription.
@@ -255,11 +255,22 @@ func MarkDeliverySuccess(ctx context.Context, deliveryID int64, statusCode int, 
 }
 
 // MarkDeliveryRetry marks a webhook delivery as failed and schedules a retry.
+// If attempts + 1 >= max_attempts, the delivery is marked as dead_letter instead.
 func MarkDeliveryRetry(ctx context.Context, deliveryID int64, nextAttemptAt time.Time, statusCode *int, errorMsg string) error {
 	query := `
 		UPDATE webhook_deliveries
-		SET status = 'pending', last_status = $1, last_error = $2, next_attempt_at = $3,
-		    attempts = attempts + 1, updated_at = CURRENT_TIMESTAMP
+		SET status = CASE
+				WHEN attempts + 1 >= max_attempts THEN 'dead_letter'
+				ELSE 'pending'
+			END,
+			last_status = $1,
+			last_error = $2,
+			next_attempt_at = CASE
+				WHEN attempts + 1 >= max_attempts THEN next_attempt_at
+				ELSE $3
+			END,
+			attempts = attempts + 1,
+			updated_at = CURRENT_TIMESTAMP
 		WHERE id = $4
 	`
 	_, err := Pool.Exec(ctx, query, statusCode, errorMsg, nextAttemptAt, deliveryID)
@@ -281,6 +292,21 @@ func MarkDeliveryDeadLetter(ctx context.Context, deliveryID int64, errorMsg stri
 		return fmt.Errorf("db: mark delivery dead letter: %w", err)
 	}
 	return nil
+}
+
+// textArrayToSlice converts a pgtype.Array[pgtype.Text] to a Go string slice.
+func textArrayToSlice(arr pgtype.Array[pgtype.Text]) []string {
+	dims := arr.Dimensions()
+	if dims == nil || len(dims) == 0 || dims[0].Length == 0 {
+		return []string{}
+	}
+	result := make([]string, 0, dims[0].Length)
+	for _, elem := range arr.Elements {
+		if elem.Valid {
+			result = append(result, elem.String)
+		}
+	}
+	return result
 }
 
 // textArrayToSlice converts a pgtype.Array[pgtype.Text] to a Go string slice.
