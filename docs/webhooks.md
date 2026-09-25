@@ -37,18 +37,18 @@ All webhook deliveries use a versioned envelope:
 
 ### Supported Event Types
 
-| Event Type | Description |
-|------------|-------------|
-| `invoice.created` | New invoice created |
-| `invoice.funded` | Invoice funded by pool |
-| `invoice.repaid` | Invoice repaid by buyer |
-| `invoice.defaulted` | Invoice defaulted |
-| `invoice.listed` | Invoice listed for financing |
-| `invoice.shipped` | Invoice marked as shipped |
-| `invoice.confirmed` | Delivery confirmed by buyer |
-| `pool.deposit` | User deposited to pool |
-| `pool.withdrawal` | User withdrew from pool |
-| `pool.yield_distributed` | Yield distributed to LPs |
+| Event Type               | Description                  |
+| ------------------------ | ---------------------------- |
+| `invoice.created`        | New invoice created          |
+| `invoice.funded`         | Invoice funded by pool       |
+| `invoice.repaid`         | Invoice repaid by buyer      |
+| `invoice.defaulted`      | Invoice defaulted            |
+| `invoice.listed`         | Invoice listed for financing |
+| `invoice.shipped`        | Invoice marked as shipped    |
+| `invoice.confirmed`      | Delivery confirmed by buyer  |
+| `pool.deposit`           | User deposited to pool       |
+| `pool.withdrawal`        | User withdrew from pool      |
+| `pool.yield_distributed` | Yield distributed to LPs     |
 
 ### Security
 
@@ -64,6 +64,7 @@ The signature is computed as `HMAC_SHA256(secret, timestamp + "." + payload)`.
 ### Retry Logic
 
 Failed deliveries are retried with exponential backoff:
+
 - Attempt 1: 10 seconds
 - Attempt 2: 20 seconds
 - Attempt 3: 40 seconds
