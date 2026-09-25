@@ -4,8 +4,31 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { InvoiceTable } from "./InvoiceTable";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+vi.mock("@/store/wallet", () => ({
+  useWalletStore: vi.fn(() => ({
+    address: "GACR43ILX6H4PGAOO5QKSZLU4ZJMGT3E66EAUDPLM5J6YTP4Y3PSHWGB",
+  })),
+}));
+
 vi.mock("@/hooks/useProfile", () => ({
   useProfile: vi.fn(() => ({ isVerified: true })),
+}));
+
+vi.mock("@/hooks/useInvoices", () => ({
+  useInvoiceActions: () => ({
+    listInvoice: vi.fn().mockResolvedValue({}),
+    fundInvoice: vi.fn().mockResolvedValue({}),
+    shipInvoice: vi.fn().mockResolvedValue({}),
+    confirmDelivery: vi.fn().mockResolvedValue({}),
+    repayInvoice: vi.fn().mockResolvedValue({}),
+    defaultInvoice: vi.fn().mockResolvedValue({}),
+  }),
+}));
+
+vi.mock("@/store/confirmDialog", () => ({
+  useConfirmDialogStore: () => ({
+    request: vi.fn(),
+  }),
 }));
 
 const queryClient = new QueryClient();
@@ -38,8 +61,9 @@ const mockInvoices = [
 describe("InvoiceTable", () => {
   it("renders a list of invoices", () => {
     renderWithQueryClient(<InvoiceTable invoices={mockInvoices as any} />);
-    expect(screen.getByText(/1,000.00 USDC/)).toBeInTheDocument();
-    expect(screen.getByText(/2,000.00 USDC/)).toBeInTheDocument();
+    // Check table rows (desktop view) - use getAllByText since mobile cards also render
+    expect(screen.getAllByText(/1,000.00 USDC/)).toHaveLength(2); // table + mobile card
+    expect(screen.getAllByText(/2,000.00 USDC/)).toHaveLength(2); // table + mobile card
   });
 
   it("renders a helpful empty state when no invoices", () => {
